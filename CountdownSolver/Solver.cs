@@ -8,28 +8,39 @@ namespace CountdownSolver
 
         }
 
-        public static IList<Calculation> Solve(IList<int> inputs)
+        public static IList<Expression> Solve(IList<int> inputs)
         {
-            var calculations = new List<Calculation>();
+            // Initialise expressions with basic single-value inputs
+            var expressions = inputs.Select((input, i) => new Expression(input, $"{input}", new[] { i })).ToList();
 
-            var iterations = inputs.Count * inputs.Count;
+            // Evaluate initial expressions (i.e. single-value expressions)
+            //while (true)
+            {
+                var count = expressions.Count;
+
+                for (var lhs = 0; lhs < count; lhs++)
+                {
+                    for (var rhs = 0; rhs < count; rhs++)
+                    {
+                        DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                        DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                        DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                        DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    }
+                }
+
+//                break;
+            }
+
+
+
+            /*
+            var start = count;
 
             var count = 0;
             var counter = 0;
-
-
-            for (var i = 0; i < inputs.Count; i++)
-            {
-                var input = inputs[i];
-
-                // Initialise
-
-                Calculation.AddToList(calculations, $"[{i}]", $"{input}", Enumerable.Empty<int>(), i, input);
-                counter++;
-            }
-
-            var start = count;
             count = counter;
+
 
             for (var iteration = 0; iteration < iterations; iteration++)
             {
@@ -43,7 +54,7 @@ namespace CountdownSolver
 
                     for (var c = start; c < count; c++)
                     {
-                        var calculation = calculations[c];
+                        var calculation = expressions[c];
 
                         if (calculation.Indexes.Contains(i)) continue;
 
@@ -53,7 +64,7 @@ namespace CountdownSolver
                         var key = calculation.Indexes.Count > 1 ? $"({calculation.Key}) + [{i}]" : $"{calculation.Key} + [{i}]";
                         var calc = calculation.Indexes.Count > 1 ? $"({calculation.Result}) + [{input}]" : $"{calculation.Result} + {input}";
 
-                        Calculation.AddToList(calculations, key, $"{calc}", calculation.Indexes, i, result);
+                        Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
                         counter++;
 
                         // Subtract
@@ -72,7 +83,7 @@ namespace CountdownSolver
                         }
 
 
-                        Calculation.AddToList(calculations, key, $"{calc}", calculation.Indexes, i, Math.Abs(result));
+                        Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, Math.Abs(result));
                         counter++;
 
                         // Multiply
@@ -81,7 +92,7 @@ namespace CountdownSolver
                         key = calculation.Indexes.Count > 1 ? $"({calculation.Key}) * [{i}]" : $"{calculation.Key} * [{i}]";
                         calc = calculation.Indexes.Count > 1 ? $"({calculation.Result}) * {input}" : $"{calculation.Result} * {input}";
 
-                        Calculation.AddToList(calculations, key, $"{calc}", calculation.Indexes, i, result);
+                        Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
                         counter++;
 
                         // Divide
@@ -94,7 +105,7 @@ namespace CountdownSolver
                             key = calculation.Indexes.Count > 1 ? $"({calculation.Key}) / [{i}]" : $"{calculation.Key} / [{i}]";
                             calc = calculation.Indexes.Count > 1 ? $"({calculation.Result}) / {input}" : $"{calculation.Result} / {input}";
 
-                            Calculation.AddToList(calculations, key, $"{calc}", calculation.Indexes, i, result);
+                            Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
                             counter++;
                         }
                         else if (x > 0 && input % x == 0)
@@ -104,7 +115,7 @@ namespace CountdownSolver
                             key = calculation.Indexes.Count > 1 ? $"[{i}] / ({calculation.Key})" : $"[{i}] / {calculation.Key}";
                             calc = calculation.Indexes.Count > 1 ? $"{input} / ({calculation.Result}) " : $"{input} / {calculation.Result}";
 
-                            Calculation.AddToList(calculations, key, $"{calc}", calculation.Indexes, i, result);
+                            Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
                             counter++;
                         }
                     }
@@ -114,8 +125,92 @@ namespace CountdownSolver
                 count += counter;
             }
 
+            */
+
+            foreach (var expression in expressions)
+            {
+                Console.WriteLine(expression);
+            }
+
             // TO BE SORTED
-            return calculations;
+            return expressions;
+        }
+
+        private static int DoAdd(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
+        {
+            if (lhs.Indexes == rhs.Indexes)
+            {
+                return 0;
+            }
+
+            var result = lhs.Result + rhs.Result;
+            var exposition = $"({lhs.Exposition})+({rhs.Exposition})";
+            expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
+
+            return 1;
+        }
+
+        private static int DoSubtract(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
+        {
+            if (lhs.Indexes == rhs.Indexes)
+            {
+                return 0;
+            }
+
+            var result = Math.Abs(lhs.Result - rhs.Result);
+            var exposition = lhs.Result > rhs.Result
+                ? $"({lhs.Exposition})-({rhs.Exposition})"
+                : $"({rhs.Exposition})-({lhs.Exposition})";
+            
+            expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
+
+            return 1;
+        }
+
+        private static int DoMultiply(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
+        {
+            if (lhs.Indexes == rhs.Indexes)
+            {
+                return 0;
+            }
+
+            var result = lhs.Result * rhs.Result;
+            var exposition = $"({lhs.Exposition})*({rhs.Exposition})";
+            expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
+
+            return 1;
+        }
+
+        private static int DoDivide(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
+        {
+            if (lhs.Indexes == rhs.Indexes)
+            {
+                return 0;
+            }
+
+            var l = lhs.Result;
+            var r = rhs.Result;
+
+            int result;
+            string? exposition;
+
+            if (r > 0 && l % r == 0)
+            {
+                result = l / r;
+                exposition = $"({lhs.Exposition})/({rhs.Exposition})";
+                expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
+                return 1;
+            }
+            
+            if (l > 0 && r % l == 0)
+            {
+                result = r / l;
+                exposition = $"({rhs.Exposition})/({lhs.Exposition})";
+                expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
+                return 1;
+            }
+
+            return 0;
         }
     }
 }
