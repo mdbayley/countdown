@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics;
+
 namespace CountdownSolver
 {
     public class Solver
@@ -13,119 +15,54 @@ namespace CountdownSolver
             // Initialise expressions with basic single-value inputs
             var expressions = inputs.Select((input, i) => new Expression(input, $"{input}", new[] { i })).ToList();
 
+            // First-Order iterations, Input v Input
+
             var count = expressions.Count;
-            var changes = 0;
+            
+            for (var lhs = 0; lhs < count; lhs++)
+            {
+                for (var rhs = 0; rhs < count; rhs++)
+                {
+                    DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                }
+            }
+
+            /*
+            foreach (var expression in expressions)
+            {
+                Console.WriteLine(expression);
+            }
+            */
+
+
+            // Second-Order iterations, Expression v Expression
+
+            count = expressions.Count;
 
             for (var lhs = 0; lhs < count; lhs++)
             {
                 for (var rhs = 0; rhs < count; rhs++)
                 {
-                    changes += DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    changes += DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    changes += DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    changes += DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    Debug.Assert(lhs < 32, "LHS");
+                    Debug.Assert(rhs < 32, "RHS");
+
+                    DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
                 }
             }
 
+            /*
             foreach (var expression in expressions)
             {
                 Console.WriteLine(expression);
             }
-
-            Console.WriteLine(changes);
-
-            /*
-            var start = count;
-
-            var count = 0;
-            var counter = 0;
-            count = counter;
-
-
-            for (var iteration = 0; iteration < iterations; iteration++)
-            {
-                Console.WriteLine($">> {iteration}");
-
-                for (var i = 0; i < inputs.Count; i++)
-                {
-                    var input = inputs[i];
-
-                    // Calculate
-
-                    for (var c = start; c < count; c++)
-                    {
-                        var calculation = expressions[c];
-
-                        if (calculation.Indexes.Contains(i)) continue;
-
-                        // Add
-
-                        var result = calculation.Result + input;
-                        var key = calculation.Indexes.Count > 1 ? $"({calculation.Key}) + [{i}]" : $"{calculation.Key} + [{i}]";
-                        var calc = calculation.Indexes.Count > 1 ? $"({calculation.Result}) + [{input}]" : $"{calculation.Result} + {input}";
-
-                        Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
-                        counter++;
-
-                        // Subtract
-
-                        result = calculation.Result - input;
-
-                        if (result < 0)
-                        {
-                            key = calculation.Indexes.Count > 1 ? $"[{i}] - ({calculation.Key})" : $"[{i}] - {calculation.Key}";
-                            calc = calculation.Indexes.Count > 1 ? $"{input} - ({calculation.Result}) " : $"{input} - {calculation.Result}";
-                        }
-                        else
-                        {
-                            key = calculation.Indexes.Count > 1 ? $"({calculation.Key}) - [{i}]" : $"{calculation.Key} - [{i}]";
-                            calc = calculation.Indexes.Count > 1 ? $"({calculation.Result}) - {input}" : $"{calculation.Result} - {input}";
-                        }
-
-
-                        Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, Math.Abs(result));
-                        counter++;
-
-                        // Multiply
-
-                        result = calculation.Result * input;
-                        key = calculation.Indexes.Count > 1 ? $"({calculation.Key}) * [{i}]" : $"{calculation.Key} * [{i}]";
-                        calc = calculation.Indexes.Count > 1 ? $"({calculation.Result}) * {input}" : $"{calculation.Result} * {input}";
-
-                        Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
-                        counter++;
-
-                        // Divide
-
-                        var x = calculation.Result;
-
-                        if (input > 0 && x % input == 0)
-                        {
-                            result = x / input;
-                            key = calculation.Indexes.Count > 1 ? $"({calculation.Key}) / [{i}]" : $"{calculation.Key} / [{i}]";
-                            calc = calculation.Indexes.Count > 1 ? $"({calculation.Result}) / {input}" : $"{calculation.Result} / {input}";
-
-                            Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
-                            counter++;
-                        }
-                        else if (x > 0 && input % x == 0)
-                        {
-                            result = input / x;
-
-                            key = calculation.Indexes.Count > 1 ? $"[{i}] / ({calculation.Key})" : $"[{i}] / {calculation.Key}";
-                            calc = calculation.Indexes.Count > 1 ? $"{input} / ({calculation.Result}) " : $"{input} / {calculation.Result}";
-
-                            Expression.AddToList(expressions, key, $"{calc}", calculation.Indexes, i, result);
-                            counter++;
-                        }
-                    }
-                }
-
-                start = count;
-                count += counter;
-            }
-
             */
+
 
             // TO BE SORTED
             return expressions;

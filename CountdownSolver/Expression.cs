@@ -11,6 +11,8 @@
             {
                 Indexes |= (int)Math.Pow(2, index);
             }
+
+            Console.WriteLine($"[{string.Join(",", indexes)}] {this}");
         }
 
         public int Result { get; set; }
