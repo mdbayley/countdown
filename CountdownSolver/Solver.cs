@@ -13,26 +13,26 @@ namespace CountdownSolver
             // Initialise expressions with basic single-value inputs
             var expressions = inputs.Select((input, i) => new Expression(input, $"{input}", new[] { i })).ToList();
 
-            // Evaluate initial expressions (i.e. single-value expressions)
-            //while (true)
+            var count = expressions.Count;
+            var changes = 0;
+
+            for (var lhs = 0; lhs < count; lhs++)
             {
-                var count = expressions.Count;
-
-                for (var lhs = 0; lhs < count; lhs++)
+                for (var rhs = 0; rhs < count; rhs++)
                 {
-                    for (var rhs = 0; rhs < count; rhs++)
-                    {
-                        DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                        DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                        DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                        DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    }
+                    changes += DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    changes += DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    changes += DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    changes += DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
                 }
-
-//                break;
             }
 
+            foreach (var expression in expressions)
+            {
+                Console.WriteLine(expression);
+            }
 
+            Console.WriteLine(changes);
 
             /*
             var start = count;
@@ -126,11 +126,6 @@ namespace CountdownSolver
             }
 
             */
-
-            foreach (var expression in expressions)
-            {
-                Console.WriteLine(expression);
-            }
 
             // TO BE SORTED
             return expressions;
