@@ -1,6 +1,4 @@
 ﻿
-using System.Diagnostics;
-
 namespace CountdownSolver
 {
     public class Solver
@@ -10,139 +8,70 @@ namespace CountdownSolver
 
         }
 
-        public static IList<Expression> Solve(IList<int> inputs)
+        public static Expression? Solve(IList<int> inputs, int target, out IList<Expression> expressions)
         {
+            expressions = new List<Expression>();
+
+            Expression? answer = null;
+
             // Initialise expressions with basic single-value inputs
-            var expressions = inputs.Select((input, i) => new Expression(input, $"{input}", new[] { i })).ToList();
 
-            // First-Order iterations, Input v Input
-
-            var count = expressions.Count;
-            
-            for (var lhs = 0; lhs < count; lhs++)
+            for (var i = 0; i < inputs.Count; i++)
             {
-                for (var rhs = 0; rhs < count; rhs++)
+                var expression = expressions.Add(i, inputs[i]);
+                answer = expression.Evaluate(answer, target);
+                if (answer.Result == target) return answer;
+            }
+
+            // Evaluate expressions against each other
+
+            bool done;
+            var count = 0;
+            do
+            {
+                var start = count;
+                count = expressions.Count;
+                done = true;
+
+                for (var lhs = 0; lhs < count; lhs++)
                 {
-                    DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
+                    for (var rhs = start; rhs < count; rhs++)
+                    {
+                        if (expressions.TryAdd(lhs, rhs, out var result))
+                        {
+                            done = false;
+                            answer = result?.Evaluate(answer, target);
+                            if (answer?.Result == target) return answer;
+                        }
+
+                        if (expressions.TrySubtract(lhs, rhs, out result))
+                        {
+                            done = false;
+                            answer = result?.Evaluate(answer, target);
+                            if (answer?.Result == target) return answer;
+                        }
+
+                        if (expressions.TryMultiply(lhs, rhs, out result))
+                        {
+                            done = false;
+                            answer = result?.Evaluate(answer, target);
+                            if (answer?.Result == target) return answer;
+                        }
+
+                        if (expressions.TryDivide(lhs, rhs, out result))
+                        {
+                            done = false;
+                            answer = result?.Evaluate(answer, target);
+                            if (answer?.Result == target) return answer;
+                        }
+                    }
+
+                    Console.Write('.');
                 }
-            }
 
-            /*
-            foreach (var expression in expressions)
-            {
-                Console.WriteLine(expression);
-            }
-            */
+            } while (!done);
 
-
-            // Second-Order iterations, Expression v Expression
-
-            count = expressions.Count;
-
-            for (var lhs = 0; lhs < count; lhs++)
-            {
-                for (var rhs = 0; rhs < count; rhs++)
-                {
-                    Debug.Assert(lhs < 32, "LHS");
-                    Debug.Assert(rhs < 32, "RHS");
-
-                    DoAdd(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    DoSubtract(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    DoMultiply(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                    DoDivide(lhs, expressions[lhs], rhs, expressions[rhs], expressions);
-                }
-            }
-
-            /*
-            foreach (var expression in expressions)
-            {
-                Console.WriteLine(expression);
-            }
-            */
-
-
-            // TO BE SORTED
-            return expressions;
-        }
-
-        private static int DoAdd(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
-        {
-            if (lhs.Indexes == rhs.Indexes)
-            {
-                return 0;
-            }
-
-            var result = lhs.Result + rhs.Result;
-            var exposition = $"({lhs.Exposition})+({rhs.Exposition})";
-            expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
-
-            return 1;
-        }
-
-        private static int DoSubtract(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
-        {
-            if (lhs.Indexes == rhs.Indexes)
-            {
-                return 0;
-            }
-
-            var result = Math.Abs(lhs.Result - rhs.Result);
-            var exposition = lhs.Result > rhs.Result
-                ? $"({lhs.Exposition})-({rhs.Exposition})"
-                : $"({rhs.Exposition})-({lhs.Exposition})";
-            
-            expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
-
-            return 1;
-        }
-
-        private static int DoMultiply(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
-        {
-            if (lhs.Indexes == rhs.Indexes)
-            {
-                return 0;
-            }
-
-            var result = lhs.Result * rhs.Result;
-            var exposition = $"({lhs.Exposition})*({rhs.Exposition})";
-            expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
-
-            return 1;
-        }
-
-        private static int DoDivide(int ilhs, Expression lhs, int irhs, Expression rhs, List<Expression> expressions)
-        {
-            if (lhs.Indexes == rhs.Indexes)
-            {
-                return 0;
-            }
-
-            var l = lhs.Result;
-            var r = rhs.Result;
-
-            int result;
-            string? exposition;
-
-            if (r > 0 && l % r == 0)
-            {
-                result = l / r;
-                exposition = $"({lhs.Exposition})/({rhs.Exposition})";
-                expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
-                return 1;
-            }
-            
-            if (l > 0 && r % l == 0)
-            {
-                result = r / l;
-                exposition = $"({rhs.Exposition})/({lhs.Exposition})";
-                expressions.Add(new Expression(result, exposition, new[] { ilhs, irhs }));
-                return 1;
-            }
-
-            return 0;
+            return answer;
         }
     }
 }

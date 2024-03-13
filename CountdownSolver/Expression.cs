@@ -2,26 +2,27 @@
 {
     public class Expression
     {
-        public Expression(int result, string? exposition, IEnumerable<int> indexes)
+        public Expression(int result, string? calculation, IEnumerable<int> indexes)
         {
             Result = result;
-            Exposition = exposition;
-
-            foreach (var index in indexes)
-            {
-                Indexes |= (int)Math.Pow(2, index);
-            }
-
-            Console.WriteLine($"[{string.Join(",", indexes)}] {this}");
+            Calculation = calculation;
+            Indexes = new HashSet<int>(indexes);
         }
 
-        public int Result { get; set; }
-        public string? Exposition { get; set; }
-        public int Indexes { get; set; } // Bitwise represenatation of the original input indexes used in the Exposition
+        public Expression(int result, string? calculation, int index)
+        {
+            Result = result;
+            Calculation = calculation;
+            Indexes = new HashSet<int> { index };
+        }
+
+        public int Result { get; init; }
+        public string? Calculation { get; init; }
+        public HashSet<int> Indexes { get; init; }
 
         public override string ToString()
         {
-            return $"{Result} = {Exposition} [{Convert.ToString(Indexes, toBase: 2).PadLeft(32, '0'), 32}]";
+            return $"{Result} = {Calculation} [{string.Join(',', Indexes)}]";
         }
     }
 }
