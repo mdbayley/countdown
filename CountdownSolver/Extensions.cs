@@ -23,7 +23,7 @@
                 : answer;
         }
 
-        public static bool TryAdd(this IList<Expression> expressions, int lhsIndex, int rhsIndex, out Expression? expression)
+        public static bool TryAdd(this ExpressionList expressions, int lhsIndex, int rhsIndex, out Expression? expression)
         {
             var lhs = expressions[lhsIndex];
             var rhs = expressions[rhsIndex];
@@ -46,7 +46,7 @@
             return true;
         }
 
-        public static bool TrySubtract(this IList<Expression> expressions, int lhsIndex, int rhsIndex, out Expression? expression)
+        public static bool TrySubtract(this ExpressionList expressions, int lhsIndex, int rhsIndex, out Expression? expression)
         {
             var lhs = expressions[lhsIndex];
             var rhs = expressions[rhsIndex];
@@ -72,7 +72,7 @@
             return true;
         }
 
-        public static bool TryMultiply(this IList<Expression> expressions, int lhsIndex, int rhsIndex, out Expression? expression)
+        public static bool TryMultiply(this ExpressionList expressions, int lhsIndex, int rhsIndex, out Expression? expression)
         {
             var lhs = expressions[lhsIndex];
             var rhs = expressions[rhsIndex];
@@ -96,7 +96,7 @@
         }
 
 
-        public static bool TryDivide(this IList<Expression> expressions, int lhsIndex, int rhsIndex, out Expression? expression)
+        public static bool TryDivide(this ExpressionList expressions, int lhsIndex, int rhsIndex, out Expression? expression)
         {
             var lhs = expressions[lhsIndex];
             var rhs = expressions[rhsIndex];

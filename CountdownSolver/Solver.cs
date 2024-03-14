@@ -8,9 +8,9 @@ namespace CountdownSolver
 
         }
 
-        public static Expression? Solve(IList<int> inputs, int target, out IList<Expression> expressions)
+        public static Expression? Solve(IList<int> inputs, int target, out ExpressionList expressions)
         {
-            expressions = new List<Expression>();
+            expressions = new ExpressionList();
 
             Expression? answer = null;
 
@@ -65,8 +65,6 @@ namespace CountdownSolver
                             if (answer?.Result == target) return answer;
                         }
                     }
-
-                    Console.Write('.');
                 }
 
             } while (!done);
